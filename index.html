@@ -217,10 +217,6 @@
                     <p>Caso você seja sorteado, entraremos em contato pelo WhatsApp.</p><br>
                     <p style="font-size: 1.4rem; color: #ff8c00; font-weight: 900;">BOA SORTE!</p>
                 </div>
-                
-                <button onclick="localStorage.removeItem('pesquisaPachecoRespondida'); location.reload();" style="background:none; border:1px solid #444; color:#aaa; padding:8px 15px; border-radius:8px; margin-top:30px; cursor:pointer; font-size: 0.8rem;">
-                    <i class="fas fa-redo"></i> Errei meus dados (Refazer)
-                </button>
             </div>
         </div>
     </div>
@@ -240,12 +236,14 @@
         const cardPromocao = document.getElementById('card-promocao');
         const telaJaRespondeu = document.getElementById('ja-respondeu');
 
+        // Verifica se já respondeu
         if (localStorage.getItem('pesquisaPachecoRespondida') === 'true') {
             cardPromocao.style.display = 'none';
             f.style.display = 'none';
             telaJaRespondeu.style.display = 'block';
         }
 
+        // Link oficial da sua planilha
         const scriptURL = 'https://script.google.com/macros/s/AKfycbzJjj7CCZLnf-1serYKYAgGRAc50IAqo-gbNnVA9vdnRWY0Yh3dENhehOkXNalQy8za4w/exec';
 
         btnSubmit.addEventListener('click', () => {
@@ -260,19 +258,22 @@
             if (!f.checkValidity()) { return; }
             e.preventDefault();
             
+            // Pega só o primeiro nome
             const nomeCompleto = document.getElementById('input-nome').value;
             const primeiroNome = nomeCompleto.split(' ')[0]; 
-            
             document.getElementById('nome-tela-sucesso').innerText = primeiroNome.toUpperCase();
 
             msgErro.style.display = 'none';
             btnSubmit.innerText = "ENVIANDO...";
             btnSubmit.disabled = true;
 
+            // Envia para o Google Sheets
             fetch(scriptURL, { method: 'POST', body: new FormData(f) })
                 .then(response => {
+                    // Carimba o celular do usuário
                     localStorage.setItem('pesquisaPachecoRespondida', 'true');
                     
+                    // Mostra a tela de sucesso
                     cardPromocao.style.display = 'none';
                     f.style.display = 'none';
                     document.getElementById('sucesso').style.display = 'block';
