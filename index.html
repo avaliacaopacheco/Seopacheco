@@ -13,7 +13,7 @@
 
         :root { --pacheco-red: #e63946; --star-gold: #ffc107; }
 
-        html, body { width: 100%; overflow-x: hidden; background-color: #000; }
+        html, body { width: 100%; overflow-x: hidden; background-color: #000; scroll-behavior: smooth; }
 
         body {
             font-family: 'Segoe UI', sans-serif; color: white;
@@ -93,6 +93,7 @@
         }
         input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1); }
 
+        /* --- ESTILO DOS ERROS --- */
         #mensagem-erro, #mensagem-erro-zap-invalido, #mensagem-erro-email-invalido {
             display: none; background: rgba(230, 57, 70, 0.2); border: 1px solid var(--pacheco-red);
             color: #fff; padding: 12px; border-radius: 8px; margin-top: 10px;
@@ -110,12 +111,19 @@
         .btn-enviar {
             background: var(--pacheco-red); color: white; border: none; padding: 18px;
             width: 100%; border-radius: 12px; font-weight: bold; font-size: 1.2rem;
-            margin-top: 20px; cursor: pointer;
+            margin-top: 20px; cursor: pointer; text-transform: uppercase;
         }
 
         #sucesso, #ja-respondeu { display: none; padding: 40px 10px; }
         .check-icon { font-size: 4.5rem; color: #27c93f; margin-bottom: 20px; }
         .success-text { font-size: 1.1rem; line-height: 1.6; color: #eee; text-align: center; }
+
+        .btn-reset {
+            background: none; border: 1px solid #ff8c00; color: #ff8c00; padding: 12px 20px; 
+            border-radius: 12px; margin-top: 15px; cursor: pointer; font-size: 0.9rem; 
+            font-weight: bold; width: 100%; display: block;
+        }
+        .btn-secondary { border-color: #444; color: #aaa; margin-top: 10px; font-size: 0.8rem; }
 
         footer { padding: 30px; font-size: 0.8rem; color: #666; text-align: center; width: 100%; background: #000; }
     </style>
@@ -151,7 +159,10 @@
                     <p style="font-size: 1.4rem; color: #ff8c00; font-weight: 900; margin-top: 15px;">BOA SORTE!</p>
                 </div>
                 
-                <button onclick="localStorage.removeItem('pesquisaPachecoRespondida'); location.reload();" style="background:none; border:1px solid #444; color:#aaa; padding:8px 15px; border-radius:8px; margin-top:30px; cursor:pointer; font-size: 0.8rem;">
+                <button onclick="localStorage.removeItem('pesquisaPachecoRespondida'); location.reload();" class="btn-reset">
+                    <i class="fas fa-users"></i> Nova Avaliação (Outra Pessoa)
+                </button>
+                <button onclick="localStorage.removeItem('pesquisaPachecoRespondida'); location.reload();" class="btn-reset btn-secondary">
                     <i class="fas fa-redo"></i> Errei meus dados (Refazer)
                 </button>
             </div>
@@ -201,7 +212,7 @@
                 <input type="text" name="nome" id="input-nome" placeholder="Digite seu Nome" required>
 
                 <label class="pergunta-label">Seu WhatsApp:</label>
-                <input type="tel" name="whatsapp" id="input-whatsapp" placeholder="(19) 99999-9999" required>
+                <input type="tel" name="whatsapp" id="input-whatsapp" placeholder="(19) 99999-9999" maxlength="15" required>
 
                 <label class="pergunta-label">Seu E-mail:</label>
                 <input type="email" name="email" id="input-email" placeholder="seuemail@exemplo.com" required>
@@ -212,11 +223,9 @@
                 <div id="mensagem-erro">
                     <i class="fas fa-exclamation-triangle"></i> Por favor, preencha todos os campos e marque as estrelinhas!
                 </div>
-
                 <div id="mensagem-erro-zap-invalido">
                     <i class="fas fa-phone-slash"></i> Número de WhatsApp incorreto!
                 </div>
-
                 <div id="mensagem-erro-email-invalido">
                     <i class="fas fa-envelope"></i> Por favor, insira um e-mail válido!
                 </div>
@@ -233,12 +242,14 @@
                     <p style="font-size: 1.4rem; color: #ff8c00; font-weight: 900;">BOA SORTE!</p>
                 </div>
                 
-                <button onclick="localStorage.removeItem('pesquisaPachecoRespondida'); location.reload();" style="background:none; border:1px solid #444; color:#aaa; padding:8px 15px; border-radius:8px; margin-top:30px; cursor:pointer; font-size: 0.8rem;">
+                <button onclick="localStorage.removeItem('pesquisaPachecoRespondida'); location.reload();" class="btn-reset">
+                    <i class="fas fa-users"></i> Nova Avaliação (Outra Pessoa)
+                </button>
+                <button onclick="localStorage.removeItem('pesquisaPachecoRespondida'); location.reload();" class="btn-reset btn-secondary">
                     <i class="fas fa-redo"></i> Errei meus dados (Refazer)
                 </button>
             </div>
 
-            </div>
         </div>
     </div>
 
@@ -267,7 +278,7 @@
 
         const scriptURL = 'https://script.google.com/macros/s/AKfycbzJjj7CCZLnf-1serYKYAgGRAc50IAqo-gbNnVA9vdnRWY0Yh3dENhehOkXNalQy8za4w/exec';
 
-        // MÁSCARA WHATSAPP VISUAL
+        // MÁSCARA ZAP
         inputZap.addEventListener('input', (e) => {
             let value = e.target.value.replace(/\D/g, "");
             if (value.length > 11) value = value.slice(0, 11);
@@ -280,7 +291,6 @@
         f.onsubmit = (e) => {
             e.preventDefault();
             
-            // Oculta avisos para revalidar
             msgErro.style.display = 'none';
             document.getElementById('mensagem-erro-zap-invalido').style.display = 'none';
             document.getElementById('mensagem-erro-email-invalido').style.display = 'none';
@@ -288,19 +298,14 @@
             const cleanZap = inputZap.value.replace(/\D/g, "");
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-            // 1. Validação Geral
             if (!f.checkValidity()) {
                 msgErro.style.display = 'block';
                 return;
             }
-
-            // 2. Validação WhatsApp (11 números)
             if (cleanZap.length < 11) {
                 document.getElementById('mensagem-erro-zap-invalido').style.display = 'block';
                 return;
             }
-
-            // 3. Validação E-mail
             if (!emailRegex.test(inputEmail.value)) {
                 document.getElementById('mensagem-erro-email-invalido').style.display = 'block';
                 return;
@@ -308,7 +313,6 @@
             
             const nomeCompleto = document.getElementById('input-nome').value;
             const primeiroNome = nomeCompleto.split(' ')[0]; 
-            
             document.getElementById('nome-tela-sucesso').innerText = primeiroNome.toUpperCase();
 
             btnSubmit.innerText = "ENVIANDO...";
