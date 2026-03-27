@@ -72,7 +72,7 @@
         .card {
             background: rgba(30, 30, 30, 0.95); padding: 25px; border-radius: 25px;
             border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 20px 40px rgba(0,0,0,0.8);
-            text-align: center;
+            text-align: center; position: relative;
         }
 
         .stars-container { display: flex; flex-direction: row-reverse; justify-content: center; gap: 8px; margin: 10px 0 20px; position: relative; }
@@ -82,31 +82,37 @@
         .stars-container input:checked ~ label, 
         .stars-container label:hover, 
         .stars-container label:hover ~ label {
-            color: var(--star-gold); text-shadow: 0 0 10px rgba(255, 193, 7, 0.4);
+            color: var(--star-gold); text-shadow: 0 0 10px rgba(255, 193, 11, 0.4);
         }
 
-        .pergunta-label { display: block; text-align: left; margin: 15px 0 5px; font-weight: bold; font-size: 0.95rem; }
+        .pergunta-label { display: block; text-align: left; margin: 15px 0 5px; font-weight: bold; font-size: 0.95rem; position: relative; }
+        
+        /* --- BALÃO DE ERRO EFEITO VIDRO (RESTORED) --- */
+        .balao-erro {
+            position: absolute; bottom: 110%; left: 0; 
+            background: rgba(255, 255, 255, 0.1); 
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #fff; padding: 8px 15px; border-radius: 12px; font-size: 0.75rem; font-weight: bold;
+            white-space: nowrap; pointer-events: none; z-index: 100;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3); display: none;
+            animation: subir 0.4s ease forwards;
+        }
+        .balao-erro::after {
+            content: ''; position: absolute; top: 100%; left: 15px;
+            border-width: 6px; border-style: solid; border-color: rgba(255,255,255,0.1) transparent transparent transparent;
+        }
+        @keyframes subir {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         input, textarea {
             width: 100%; padding: 14px; background: rgba(0, 0, 0, 0.6);
             border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 12px;
             color: white; font-size: 1rem; outline: none; margin-bottom: 15px;
         }
         input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1); }
-
-        /* --- ESTILO DOS ERROS --- */
-        .erro-alerta {
-            display: none; background: rgba(230, 57, 70, 0.2); border: 1px solid var(--pacheco-red);
-            color: #fff; padding: 12px; border-radius: 8px; margin-bottom: 15px;
-            font-weight: bold; font-size: 0.9rem; text-align: center; animation: tremer 0.3s;
-        }
-
-        @keyframes tremer {
-            0% { transform: translateX(0); }
-            25% { transform: translateX(-5px); }
-            50% { transform: translateX(5px); }
-            75% { transform: translateX(-5px); }
-            100% { transform: translateX(0); }
-        }
 
         .btn-enviar {
             background: var(--pacheco-red); color: white; border: none; padding: 18px;
@@ -146,8 +152,8 @@
             
             <form id="feedback-form" novalidate>
                 
-                <label class="pergunta-label"><i class="fas fa-drumstick-bite"></i> O que você achou da Refeição?</label>
-                <div class="stars-container">
+                <label class="pergunta-label"><i class="fas fa-drumstick-bite"></i> O que você achou da Refeição? <span class="balao-erro">PREENCHA ESTE CAMPO</span></label>
+                <div class="stars-container" id="grupo-refeicao">
                     <input type="radio" name="refeicao" id="c5" value="5" required><label for="c5" class="fas fa-star"></label>
                     <input type="radio" name="refeicao" id="c4" value="4"><label for="c4" class="fas fa-star"></label>
                     <input type="radio" name="refeicao" id="c3" value="3"><label for="c3" class="fas fa-star"></label>
@@ -155,8 +161,8 @@
                     <input type="radio" name="refeicao" id="c1" value="1"><label for="c1" class="fas fa-star"></label>
                 </div>
 
-                <label class="pergunta-label"><i class="fas fa-concierge-bell"></i> Nota para o Atendimento:</label>
-                <div class="stars-container">
+                <label class="pergunta-label"><i class="fas fa-concierge-bell"></i> Nota para o Atendimento: <span class="balao-erro">PREENCHA ESTE CAMPO</span></label>
+                <div class="stars-container" id="grupo-atendimento">
                     <input type="radio" name="atendimento" id="a5" value="5" required><label for="a5" class="fas fa-star"></label>
                     <input type="radio" name="atendimento" id="a4" value="4"><label for="a4" class="fas fa-star"></label>
                     <input type="radio" name="atendimento" id="a3" value="3"><label for="a3" class="fas fa-star"></label>
@@ -164,8 +170,8 @@
                     <input type="radio" name="atendimento" id="a1" value="1"><label for="a1" class="fas fa-star"></label>
                 </div>
 
-                <label class="pergunta-label"><i class="fas fa-broom"></i> Limpeza e Organização:</label>
-                <div class="stars-container">
+                <label class="pergunta-label"><i class="fas fa-broom"></i> Limpeza e Organização: <span class="balao-erro">PREENCHA ESTE CAMPO</span></label>
+                <div class="stars-container" id="grupo-limpeza">
                     <input type="radio" name="limpeza" id="l5" value="5" required><label for="l5" class="fas fa-star"></label>
                     <input type="radio" name="limpeza" id="l4" value="4"><label for="l4" class="fas fa-star"></label>
                     <input type="radio" name="limpeza" id="l3" value="3"><label for="l3" class="fas fa-star"></label>
@@ -173,8 +179,8 @@
                     <input type="radio" name="limpeza" id="l1" value="1"><label for="l1" class="fas fa-star"></label>
                 </div>
 
-               <label class="pergunta-label"><i class="fas fa-heart"></i> Recomendaria o Seo Pacheco?</label>
-                <div class="stars-container">
+               <label class="pergunta-label"><i class="fas fa-heart"></i> Recomendaria o Seo Pacheco? <span class="balao-erro">PREENCHA ESTE CAMPO</span></label>
+                <div class="stars-container" id="grupo-recomenda">
                     <input type="radio" name="recomenda" id="r5" value="5" required><label for="r5" class="fas fa-star"></label>
                     <input type="radio" name="recomenda" id="r4" value="4"><label for="r4" class="fas fa-star"></label>
                     <input type="radio" name="recomenda" id="r3" value="3"><label for="r3" class="fas fa-star"></label>
@@ -185,32 +191,24 @@
                 <label class="pergunta-label"><i class="fas fa-comment-dots"></i> Sugestões e Elogios:</label>
                 <textarea name="sugestoes" rows="3" placeholder="Conte-nos como foi sua experiência..."></textarea>
 
-                <label class="pergunta-label">Seu Nome:</label>
-                <input type="text" name="nome" id="input-nome" placeholder="Digite seu Nome" required>
-
-                <label class="pergunta-label">Seu WhatsApp:</label>
-                <input type="tel" name="whatsapp" id="input-whatsapp" placeholder="(19) 99999-9999" maxlength="15" required>
-
-                <label class="pergunta-label">Seu E-mail:</label>
-                <input type="email" name="email" id="input-email" placeholder="seuemail@exemplo.com" required>
-
-                <label class="pergunta-label">Sua Data de Nascimento:</label>
-                <input type="date" name="nascimento" required>
-
-                <div id="mensagem-erro" class="erro-alerta">
-                    <i class="fas fa-exclamation-triangle"></i> Por favor, preencha todos os campos e marque as estrelinhas!
-                </div>
-                
-                <div id="mensagem-erro-zap" class="erro-alerta">
-                    <i class="fas fa-ban"></i> Este número de WhatsApp já participou da pesquisa!
+                <div style="position: relative;">
+                    <label class="pergunta-label">Seu Nome: <span class="balao-erro">PREENCHA ESTE CAMPO</span></label>
+                    <input type="text" name="nome" id="input-nome" placeholder="Digite seu Nome" required>
                 </div>
 
-                <div id="mensagem-erro-zap-invalido" class="erro-alerta">
-                    <i class="fas fa-phone-slash"></i> Número de WhatsApp incorreto!
+                <div style="position: relative;">
+                    <label class="pergunta-label">Seu WhatsApp: <span class="balao-erro">PREENCHA ESTE CAMPO</span></label>
+                    <input type="tel" name="whatsapp" id="input-whatsapp" placeholder="(19) 99999-9999" maxlength="15" required>
                 </div>
 
-                <div id="mensagem-erro-email-invalido" class="erro-alerta">
-                    <i class="fas fa-envelope-open-text"></i> Por favor, insira um e-mail válido!
+                <div style="position: relative;">
+                    <label class="pergunta-label">Seu E-mail: <span class="balao-erro">E-MAIL INVÁLIDO</span></label>
+                    <input type="email" name="email" id="input-email" placeholder="seuemail@exemplo.com" required>
+                </div>
+
+                <div style="position: relative;">
+                    <label class="pergunta-label">Sua Data de Nascimento: <span class="balao-erro">PREENCHA ESTE CAMPO</span></label>
+                    <input type="date" name="nascimento" required>
                 </div>
 
                 <button type="submit" class="btn-enviar" id="btn-submit">ENVIAR AVALIAÇÃO</button>
@@ -248,7 +246,7 @@
 
         const scriptURL = 'https://script.google.com/macros/s/AKfycbzJjj7CCZLnf-1serYKYAgGRAc50IAqo-gbNnVA9vdnRWY0Yh3dENhehOkXNalQy8za4w/exec';
 
-        // MÁSCARA WHATSAPP (Apenas formatação visual)
+        // MÁSCARA WHATSAPP
         inputZap.addEventListener('input', (e) => {
             let value = e.target.value.replace(/\D/g, "");
             if (value.length > 11) value = value.slice(0, 11);
@@ -258,41 +256,63 @@
             else e.target.value = value.replace(/^(\d*)$/, "($1");
         });
 
+        // FUNÇÃO PARA LIMPAR BALÕES (SÓ CHAMADA NO SUBMIT)
+        function limparErros() {
+            document.querySelectorAll('.balao-erro').forEach(el => el.style.display = 'none');
+        }
+
         f.onsubmit = (e) => {
             e.preventDefault();
-            
-            // Oculta todas as mensagens de erro antes de validar novamente
-            document.querySelectorAll('.erro-alerta').forEach(el => el.style.display = 'none');
+            limparErros();
+            let erros = [];
 
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             const cleanZap = inputZap.value.replace(/\D/g, "");
 
-            // 1. Validação Geral (Campos obrigatórios)
-            if (!f.checkValidity()) {
-                document.getElementById('mensagem-erro').style.display = 'block';
+            // 1. Validação de Estrelas
+            const gruposRadio = ['refeicao', 'atendimento', 'limpeza', 'recomenda'];
+            gruposRadio.forEach(nome => {
+                if (!f.querySelector(`input[name="${nome}"]:checked`)) {
+                    let container = document.getElementById(`grupo-${nome}`);
+                    let balao = container.previousElementSibling.querySelector('.balao-erro');
+                    balao.style.display = 'block';
+                    erros.push(balao);
+                }
+            });
+
+            // 2. Validação de Texto
+            f.querySelectorAll('input[required]:not([type="radio"])').forEach(input => {
+                let balao = input.previousElementSibling.querySelector('.balao-erro');
+                
+                if (!input.value.trim()) {
+                    balao.innerText = "PREENCHA ESTE CAMPO";
+                    balao.style.display = 'block';
+                    erros.push(balao);
+                } 
+                else if (input.id === 'input-whatsapp' && cleanZap.length < 11) {
+                    balao.innerText = "NÚMERO INCORRETO";
+                    balao.style.display = 'block';
+                    erros.push(balao);
+                }
+                else if (input.type === 'email' && !emailRegex.test(input.value)) {
+                    balao.innerText = "E-MAIL INVÁLIDO";
+                    balao.style.display = 'block';
+                    erros.push(balao);
+                }
+            });
+
+            if (erros.length > 0) {
+                erros[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
                 return;
             }
 
-            // 2. Validação WhatsApp (11 dígitos)
-            if (cleanZap.length < 11) {
-                document.getElementById('mensagem-erro-zap-invalido').style.display = 'block';
-                return;
-            }
-
-            // 3. Validação E-mail
-            if (!emailRegex.test(inputEmail.value)) {
-                document.getElementById('mensagem-erro-email-invalido').style.display = 'block';
-                return;
-            }
-
-            // 4. Trava de Repetição (Local Storage)
+            // 3. Trava de Repetição (Local Storage)
             let numerosUsados = JSON.parse(localStorage.getItem('pachecoZaps') || '[]');
             if (numerosUsados.includes(cleanZap)) {
-                document.getElementById('mensagem-erro-zap').style.display = 'block';
+                alert("Este número de WhatsApp já participou da pesquisa!");
                 return; 
             }
             
-            // Sucesso na validação, inicia o envio
             const nomeCompleto = document.getElementById('input-nome').value;
             const primeiroNome = nomeCompleto.split(' ')[0]; 
             document.getElementById('nome-tela-sucesso').innerText = primeiroNome.toUpperCase();
