@@ -13,7 +13,7 @@
 
         :root { --pacheco-red: #e63946; --star-gold: #ffc107; }
 
-        html, body { width: 100%; overflow-x: hidden; background-color: #000; }
+        html, body { width: 100%; overflow-x: hidden; background-color: #000; scroll-behavior: smooth; }
 
         body {
             font-family: 'Segoe UI', sans-serif; color: white;
@@ -93,9 +93,10 @@
         }
         input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1); }
 
-        #mensagem-erro, #mensagem-erro-zap {
+        /* --- ESTILO DOS ERROS --- */
+        .erro-alerta {
             display: none; background: rgba(230, 57, 70, 0.2); border: 1px solid var(--pacheco-red);
-            color: #fff; padding: 12px; border-radius: 8px; margin-top: 10px;
+            color: #fff; padding: 12px; border-radius: 8px; margin-bottom: 15px;
             font-weight: bold; font-size: 0.9rem; text-align: center; animation: tremer 0.3s;
         }
 
@@ -110,7 +111,7 @@
         .btn-enviar {
             background: var(--pacheco-red); color: white; border: none; padding: 18px;
             width: 100%; border-radius: 12px; font-weight: bold; font-size: 1.2rem;
-            margin-top: 20px; cursor: pointer;
+            margin-top: 20px; cursor: pointer; text-transform: uppercase;
         }
 
         #sucesso { display: none; padding: 40px 10px; }
@@ -143,7 +144,7 @@
 
         <div class="card" data-aos="fade-up">
             
-            <form id="feedback-form">
+            <form id="feedback-form" novalidate>
                 
                 <label class="pergunta-label"><i class="fas fa-drumstick-bite"></i> O que você achou da Refeição?</label>
                 <div class="stars-container">
@@ -188,17 +189,28 @@
                 <input type="text" name="nome" id="input-nome" placeholder="Digite seu Nome" required>
 
                 <label class="pergunta-label">Seu WhatsApp:</label>
-                <input type="tel" name="whatsapp" id="input-whatsapp" placeholder="(19) 99999-9999" required>
+                <input type="tel" name="whatsapp" id="input-whatsapp" placeholder="(19) 99999-9999" maxlength="15" required>
+
+                <label class="pergunta-label">Seu E-mail:</label>
+                <input type="email" name="email" id="input-email" placeholder="seuemail@exemplo.com" required>
 
                 <label class="pergunta-label">Sua Data de Nascimento:</label>
                 <input type="date" name="nascimento" required>
 
-                <div id="mensagem-erro">
+                <div id="mensagem-erro" class="erro-alerta">
                     <i class="fas fa-exclamation-triangle"></i> Por favor, preencha todos os campos e marque as estrelinhas!
                 </div>
                 
-                <div id="mensagem-erro-zap">
+                <div id="mensagem-erro-zap" class="erro-alerta">
                     <i class="fas fa-ban"></i> Este número de WhatsApp já participou da pesquisa!
+                </div>
+
+                <div id="mensagem-erro-zap-invalido" class="erro-alerta">
+                    <i class="fas fa-phone-slash"></i> Número de WhatsApp incorreto!
+                </div>
+
+                <div id="mensagem-erro-email-invalido" class="erro-alerta">
+                    <i class="fas fa-envelope-open-text"></i> Por favor, insira um e-mail válido!
                 </div>
 
                 <button type="submit" class="btn-enviar" id="btn-submit">ENVIAR AVALIAÇÃO</button>
@@ -231,63 +243,76 @@
         
         const f = document.getElementById('feedback-form');
         const btnSubmit = document.getElementById('btn-submit');
-        const msgErro = document.getElementById('mensagem-erro');
-        const msgErroZap = document.getElementById('mensagem-erro-zap');
-        const cardPromocao = document.getElementById('card-promocao');
         const inputZap = document.getElementById('input-whatsapp');
+        const inputEmail = document.getElementById('input-email');
 
         const scriptURL = 'https://script.google.com/macros/s/AKfycbzJjj7CCZLnf-1serYKYAgGRAc50IAqo-gbNnVA9vdnRWY0Yh3dENhehOkXNalQy8za4w/exec';
 
-        btnSubmit.addEventListener('click', () => {
-            msgErroZap.style.display = 'none';
-            if (!f.checkValidity()) {
-                msgErro.style.display = 'block';
-            } else {
-                msgErro.style.display = 'none';
-            }
+        // MÁSCARA WHATSAPP (Apenas formatação visual)
+        inputZap.addEventListener('input', (e) => {
+            let value = e.target.value.replace(/\D/g, "");
+            if (value.length > 11) value = value.slice(0, 11);
+            if (value.length > 10) e.target.value = value.replace(/^(\d{2})(\d{5})(\d{4})$/, "($1) $2-$3");
+            else if (value.length > 6) e.target.value = value.replace(/^(\d{2})(\d{4})(\d{0,4})$/, "($1) $2-$3");
+            else if (value.length > 2) e.target.value = value.replace(/^(\d{2})(\d{0,5})$/, "($1) $2");
+            else e.target.value = value.replace(/^(\d*)$/, "($1");
         });
 
         f.onsubmit = (e) => {
-            if (!f.checkValidity()) { return; }
             e.preventDefault();
             
-            // Pega a lista de números já usados neste celular
-            let numerosUsados = JSON.parse(localStorage.getItem('pachecoZaps') || '[]');
-            
-            // Limpa o número digitado para evitar truques com espaços e traços
-            let zapDigitado = inputZap.value.replace(/[^a-zA-Z0-9]/g, '');
+            // Oculta todas as mensagens de erro antes de validar novamente
+            document.querySelectorAll('.erro-alerta').forEach(el => el.style.display = 'none');
 
-            // Se o número já foi usado, aciona a trava e para tudo
-            if (numerosUsados.includes(zapDigitado)) {
-                msgErroZap.style.display = 'block';
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            const cleanZap = inputZap.value.replace(/\D/g, "");
+
+            // 1. Validação Geral (Campos obrigatórios)
+            if (!f.checkValidity()) {
+                document.getElementById('mensagem-erro').style.display = 'block';
+                return;
+            }
+
+            // 2. Validação WhatsApp (11 dígitos)
+            if (cleanZap.length < 11) {
+                document.getElementById('mensagem-erro-zap-invalido').style.display = 'block';
+                return;
+            }
+
+            // 3. Validação E-mail
+            if (!emailRegex.test(inputEmail.value)) {
+                document.getElementById('mensagem-erro-email-invalido').style.display = 'block';
+                return;
+            }
+
+            // 4. Trava de Repetição (Local Storage)
+            let numerosUsados = JSON.parse(localStorage.getItem('pachecoZaps') || '[]');
+            if (numerosUsados.includes(cleanZap)) {
+                document.getElementById('mensagem-erro-zap').style.display = 'block';
                 return; 
             }
             
+            // Sucesso na validação, inicia o envio
             const nomeCompleto = document.getElementById('input-nome').value;
             const primeiroNome = nomeCompleto.split(' ')[0]; 
             document.getElementById('nome-tela-sucesso').innerText = primeiroNome.toUpperCase();
 
-            msgErro.style.display = 'none';
-            msgErroZap.style.display = 'none';
             btnSubmit.innerText = "ENVIANDO...";
             btnSubmit.disabled = true;
 
             fetch(scriptURL, { method: 'POST', body: new FormData(f) })
                 .then(response => {
-                    // Guarda esse número na memória do celular
-                    numerosUsados.push(zapDigitado);
+                    numerosUsados.push(cleanZap);
                     localStorage.setItem('pachecoZaps', JSON.stringify(numerosUsados));
                     
-                    cardPromocao.style.display = 'none';
+                    document.getElementById('card-promocao').style.display = 'none';
                     f.style.display = 'none';
                     document.getElementById('sucesso').style.display = 'block';
-                    AOS.refresh();
                     window.scrollTo(0,0);
                 })
                 .catch(error => {
                     btnSubmit.innerText = "ERRO! TENTE NOVAMENTE.";
                     btnSubmit.disabled = false;
-                    console.error('Erro!', error.message);
                 });
         };
     </script>
