@@ -94,7 +94,7 @@
         input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1); }
 
         /* --- ESTILO DOS ERROS --- */
-        #mensagem-erro, #mensagem-erro-zap-invalido, #mensagem-erro-email-invalido {
+        #mensagem-erro, #mensagem-erro-zap-invalido {
             display: none; background: rgba(230, 57, 70, 0.2); border: 1px solid var(--pacheco-red);
             color: #fff; padding: 12px; border-radius: 8px; margin-top: 10px;
             font-weight: bold; font-size: 0.9rem; text-align: center; animation: tremer 0.3s;
@@ -214,9 +214,6 @@
                 <label class="pergunta-label">Seu WhatsApp:</label>
                 <input type="tel" name="whatsapp" id="input-whatsapp" placeholder="(19) 99999-9999" maxlength="15" required>
 
-                <label class="pergunta-label">Seu E-mail:</label>
-                <input type="email" name="email" id="input-email" placeholder="seuemail@exemplo.com" required>
-
                 <label class="pergunta-label">Sua Data de Nascimento:</label>
                 <input type="date" name="nascimento" required>
 
@@ -225,9 +222,6 @@
                 </div>
                 <div id="mensagem-erro-zap-invalido">
                     <i class="fas fa-phone-slash"></i> Número de WhatsApp incorreto!
-                </div>
-                <div id="mensagem-erro-email-invalido">
-                    <i class="fas fa-envelope"></i> Por favor, insira um e-mail válido!
                 </div>
 
                 <button type="submit" class="btn-enviar" id="btn-submit">ENVIAR AVALIAÇÃO</button>
@@ -266,7 +260,6 @@
         const btnSubmit = document.getElementById('btn-submit');
         const msgErro = document.getElementById('mensagem-erro');
         const inputZap = document.getElementById('input-whatsapp');
-        const inputEmail = document.getElementById('input-email');
         const cardPromocao = document.getElementById('card-promocao');
         const telaJaRespondeu = document.getElementById('ja-respondeu');
 
@@ -293,10 +286,8 @@
             
             msgErro.style.display = 'none';
             document.getElementById('mensagem-erro-zap-invalido').style.display = 'none';
-            document.getElementById('mensagem-erro-email-invalido').style.display = 'none';
 
             const cleanZap = inputZap.value.replace(/\D/g, "");
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
             if (!f.checkValidity()) {
                 msgErro.style.display = 'block';
@@ -304,10 +295,6 @@
             }
             if (cleanZap.length < 11) {
                 document.getElementById('mensagem-erro-zap-invalido').style.display = 'block';
-                return;
-            }
-            if (!emailRegex.test(inputEmail.value)) {
-                document.getElementById('mensagem-erro-email-invalido').style.display = 'block';
                 return;
             }
             
