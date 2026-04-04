@@ -112,7 +112,18 @@
             100% { transform: translateX(0); }
         }
 
-        .btn-enviar {
+  
+  .texto-aceite {
+    font-size: 0.65rem; 
+    color: #888;       
+    margin: 12px 0 3px;  
+    line-height: 1.4;   
+    text-align: center; 
+    padding: 0 10px;    
+}
+
+
+      .btn-enviar {
             background: var(--pacheco-red); color: white; border: none; padding: 18px;
             width: 100%; border-radius: 12px; font-weight: bold; font-size: 1.2rem;
             margin-top: 20px; cursor: pointer; text-transform: uppercase;
@@ -230,7 +241,7 @@
                     <i class="fas fa-phone-slash"></i> Número de WhatsApp incorreto!
                 </div>
                 <p class="texto-aceite">
-                    Ao enviar, você concorda em compartilhar seus dados para fins de sorteio e contato do restaurante.
+                    *Ao enviar, você concorda em compartilhar seus dados para fins de sorteio e contato do restaurante*.
                 </p>
                 
                 <button type="submit" class="btn-enviar" id="btn-submit">ENVIAR AVALIAÇÃO</button>
